@@ -1014,7 +1014,7 @@ if uploaded_file:
 
             fig.update_layout(
                 xaxis_tickangle=-45,
-                width=800,
+                width=1000,
                 height=700,
                 margin=dict(l=20, r=20, t=40, b=20),
                 showlegend=True,
@@ -1086,7 +1086,7 @@ if uploaded_file:
 
             fig.update_layout(
                 xaxis_tickangle=-45,
-                width=800,
+                width=1100,
                 height=700,
                 margin=dict(l=20, r=20, t=40, b=20),
                 showlegend=True,
