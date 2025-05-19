@@ -433,7 +433,7 @@ if uploaded_file:
             fig.add_hline(
                 y=threshold,
                 line_dash="dash",
-                line_color="gray",
+                line_color="red",
                 annotation_text=f"Target Performance = {threshold}",
                 annotation_position="top left"
             )
@@ -525,7 +525,7 @@ if uploaded_file:
             fig.add_hline(
                 y=threshold,
                 line_dash="dash",
-                line_color="gray",
+                line_color="red",
                 annotation_text=f"Target Performance = {threshold}",
                 annotation_position="top left"
             )
@@ -615,7 +615,7 @@ if uploaded_file:
             fig.add_hline(
                 y=threshold,
                 line_dash="dash",
-                line_color="gray",
+                line_color="red",
                 annotation_text=f"Target Performance = {threshold}",
                 annotation_position="top left"
             )
