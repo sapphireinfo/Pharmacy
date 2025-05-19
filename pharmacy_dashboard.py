@@ -100,9 +100,14 @@ if uploaded_file:
             "NMS",
             "BLOOD PRESSURE",
             "P1 (NHS 111 & GP REFERRALS & CLIN PW)",
-            "CORE SERVICES (£)",
             "P1 CLINICAL PATHWAYS",
-            "COVID VAC (TOTAL FOR SEASON)"
+            "COVID VAC (TOTAL FOR SEASON)",
+            "Flu (TOTAL FOR SEASON)",
+            "ABPM",
+            "DMS",
+            "OC",
+            "LFD",
+            "CPCS"
         ]
 
         # Prepare long-format DataFrame
@@ -153,9 +158,14 @@ if uploaded_file:
             "NMS_1", 
             "BLOOD PRESSURE_1",
             "P1 (NHS 111 & GP REFERRALS & CLIN PW)_1",
-            "CORE SERVICES (£)_1",
             "P1 CLINICAL PATHWAYS_1",
-            "COVID VAC (TOTAL FOR SEASON)_1"
+            "COVID VAC (TOTAL FOR SEASON)_1",
+            "Flu (TOTAL FOR SEASON)",
+            "ABPM_1",
+            "DMS_1",
+            "OC_1",
+            "LFD_1",
+            "CPCS_1"
         ]
 
         # Prepare long-format DataFrame
@@ -206,9 +216,14 @@ if uploaded_file:
             "NMS_2", 
             "BLOOD PRESSURE_2",
             "P1 (NHS 111 & GP REFERRALS)",
-            "CORE SERVICES (£)_1",
             "P1 CLINICAL PATHWAYS_1",
-            "COVID VAC (TOTAL FOR SEASON)_1"
+            "COVID VAC (TOTAL FOR SEASON)_1",
+            "Flu (TOTAL FOR SEASON)",
+            "ABPM_2",
+            "DMS_2",
+            "OC_2",
+            "LFD_2",
+            "CPCS_2"
         ]
 
         # Prepare long-format DataFrame
@@ -258,9 +273,14 @@ if uploaded_file:
             "NMS_3", 
             "BLOOD PRESSURE_3",
             "P1 (NHS 111 & GP REFERRALS)_1",
-            "TOTAL SERVICES (£)_1",
             "P1 CLINICAL PATHWAYS_3",
-            "COVID VAC (TOTAL FOR SEASON)_3"
+            "COVID VAC (TOTAL FOR SEASON)_3",
+            "Flu (TOTAL FOR SEASON)",
+            "ABPM_3",
+            "DMS_3",
+            "OC_3",
+            "LFD_3",
+            "CPCS_3"
         ]
 
         # Prepare long-format DataFrame
@@ -417,7 +437,7 @@ if uploaded_file:
 
             # Display status messages
             for name, value in pcm_data.items():
-                if value < 30:
+                if value < 50:
                     st.markdown(
                         f"<div style='color:red; font-weight:bold;'>⚠️ {name}: Underperforming (Average PCM = {value})</div>",
                         unsafe_allow_html=True
@@ -491,7 +511,7 @@ if uploaded_file:
 
             # Display status messages
             for name, value in pcm_data.items():
-                if value < 30:
+                if value < 20:
                     st.markdown(
                         f"<div style='color:red; font-weight:bold;'>⚠️ {name}: Underperforming (Average PCM = {value})</div>",
                         unsafe_allow_html=True
