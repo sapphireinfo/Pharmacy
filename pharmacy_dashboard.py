@@ -80,7 +80,7 @@ if uploaded_file:
                     st.warning(f"⚠️ {title} service not found.")
 
 
-        st.subheader("📊 Monthly Service Trends for Each Service – JASMI LIMITED (FRT03))
+        st.subheader("📊 Monthly Service Trends for Each Service – JASMI LIMITED (FRT03)")
         col1, col2 = st.columns(2)
         show_line_chart("NMS", "NMS", col1)
         show_line_chart("Blood Pressure", "BLOOD PRESSURE", col2)
