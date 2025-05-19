@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import re
 import plotly.express as px
+import plotly.graph_objects as go
+
 
 st.set_page_config(page_title="Pharmacy Service Dashboard", layout="wide")
 st.title("🏥 Pharmacy Service Performance Dashboard")
@@ -39,25 +41,28 @@ if uploaded_file:
             df[month] = pd.to_numeric(df[month], errors='coerce')
 
         def show_line_chart(title, keyword, col):
+            # Define target PCMs for specific services only
+            target_pcm_map = {
+                "P1 (NHS 111 & GP REFERRALS & CLIN PW)": 50,
+                "BLOOD PRESSURE": 30,
+                "ABPM":20,
+                "LFD":20,
+                "OC":20,
+                "DMS":20
+            }
+            
             with col:
-                st.markdown(f"### {title}")
+                # st.markdown(f"### {title}")
                 rows = df[df[service_column].astype(str).str.strip().str.upper() == keyword.upper()]
                 if not rows.empty:
-                    # Create base DataFrame with all months
                     chart_data = pd.DataFrame({'Month': months})
                     chart_data['Month_dt'] = pd.to_datetime(chart_data['Month'], format='%b-%y')
 
-                    # Fetch values and merge
                     values = pd.to_numeric(rows.iloc[0][months], errors='coerce')
                     chart_data['Value'] = values.values
-
-                    # Fill missing with 0 or NaN based on your choice
-                    chart_data['Value'].fillna(0, inplace=True)  # Or use NaN if you want breaks instead of zero lines
-
-                    # Sort properly
+                    chart_data['Value'].fillna(0, inplace=True)
                     chart_data = chart_data.sort_values('Month_dt')
 
-                    # Plot with consistent monthly ticks
                     fig = px.line(
                         chart_data,
                         x='Month_dt',
@@ -67,17 +72,29 @@ if uploaded_file:
                         labels={'Month_dt': 'Month', 'Value': title}
                     )
 
+                    # Add target PCM only for these 2 services
+                    target_pcm = target_pcm_map.get(keyword.upper())
+                    if target_pcm is not None:
+                        fig.add_hline(
+                            y=target_pcm,
+                            line_dash="dash",
+                            line_color="red",
+                            annotation_text=f"Target Performance = {target_pcm}",
+                            annotation_position="top left"
+                        )
+
                     fig.update_layout(
                         xaxis_tickformat='%b %y',
                         xaxis=dict(
                             tickmode='linear',
-                            dtick="M1"  # Force monthly ticks
+                            dtick="M1"
                         )
                     )
 
                     st.plotly_chart(fig, use_container_width=True)
                 else:
                     st.warning(f"⚠️ {title} service not found.")
+
 
 
         st.subheader("📊 Monthly Service Trends for Each Service – JASMI LIMITED (FRT03)")
@@ -87,11 +104,19 @@ if uploaded_file:
 
         col3, col4 = st.columns(2)
         show_line_chart("P1 (NHS 111 & GP Referrals & Clin PW)", "P1 (NHS 111 & GP REFERRALS & CLIN PW)", col3)
-        show_line_chart("Core Services (£)", "CORE SERVICES (£)", col4)
+        show_line_chart("ABPM", "ABPM", col4)
 
         col5, col6 = st.columns(2)
         show_line_chart("P1 Clinical Pathways", "P1 CLINICAL PATHWAYS", col5)
         show_line_chart("Covid Vac (Total for season)", "COVID VAC (TOTAL FOR SEASON)", col6)
+
+        col7, col8 = st.columns(2)
+        show_line_chart("DMS", "DMS", col7)
+        show_line_chart("OC", "OC", col8)
+
+        col9, col10 = st.columns(2)
+        show_line_chart("Flu (Total for season)", "Flu (TOTAL FOR SEASON)", col9)
+        show_line_chart("LFD", "LFD", col10)
 
 
 #######Multi LIne CHart###########################################
@@ -148,7 +173,10 @@ if uploaded_file:
             xaxis=dict(tickmode="linear", dtick="M1"),
             legend_title_text="Service",
             title_x=0.25,
-            margin=dict(l=20, r=20, t=60, b=40)
+            margin=dict(l=20, r=20, t=60, b=40),
+            clickmode="event+select",
+            legend_itemclick="toggleothers",
+            legend_itemdoubleclick="toggle"
         )
 
         st.plotly_chart(fig, use_container_width=False)
@@ -206,7 +234,10 @@ if uploaded_file:
             xaxis=dict(tickmode="linear", dtick="M1"),
             legend_title_text="Service",
             title_x=0.25,
-            margin=dict(l=20, r=20, t=60, b=40)
+            margin=dict(l=20, r=20, t=60, b=40),
+            clickmode="event+select",
+            legend_itemclick="toggleothers",
+            legend_itemdoubleclick="toggle"
         )
 
         st.plotly_chart(fig2, use_container_width=False)
@@ -263,7 +294,10 @@ if uploaded_file:
             xaxis=dict(tickmode="linear", dtick="M1"),
             legend_title_text="Service",
             title_x=0.25,
-            margin=dict(l=20, r=20, t=60, b=40)
+            margin=dict(l=20, r=20, t=60, b=40),
+            clickmode="event+select",
+            legend_itemclick="toggleothers",
+            legend_itemdoubleclick="toggle"
         )
 
         st.plotly_chart(fig2, use_container_width=False)
@@ -320,14 +354,18 @@ if uploaded_file:
             xaxis=dict(tickmode="linear", dtick="M1"),
             legend_title_text="Service",
             title_x=0.25,
-            margin=dict(l=20, r=20, t=60, b=40)
+            margin=dict(l=20, r=20, t=60, b=40),
+            clickmode="event+select",
+            legend_itemclick="toggleothers",
+            legend_itemdoubleclick="toggle"
         )
 
         st.plotly_chart(fig2, use_container_width=False)
 
 
 #######BAR CHART###########################
-        # PCM Comparison
+
+        # Mapping service keys to display names with pharmacy names
         st.subheader("📊 P1 (NHS 111 & GP referrals & Clin PW) Services: Average PCM Comparison")
 
         # Mapping service keys to display names with pharmacy names
@@ -338,15 +376,18 @@ if uploaded_file:
             "P1 (NHS 111 & GP referrals)_1": "P1 (NHS 111 & GP referrals) (WOODBRIDGE PHARMACY FLD83)"
         }
 
-        # Define colors for each pharmacy display name
+        # Define colors for each pharmacy display name — keys must exactly match the target_services values
         color_map = {
-            "P1 (NHS 111 & GP referrals & Clin PW) (JASMI LIMITED FRT03)": "red",
-            "P1 (NHS 111 & GP referrals & Clin PW)_1 (REVELSTOKE PHARMACY FE297)": "orange",
-            "P1 (NHS 111 & GP referrals) (TRINITY PHARMACY FKP10)": "blue",
-            "P1 (NHS 111 & GP referrals)_1 (WOODBRIDGE PHARMACY FLD83)": "green"
+            "P1 (NHS 111 & GP referrals & Clin PW) (JASMI LIMITED FRT03)": "#FFB3B3",       # Light Red
+            "P1 (NHS 111 & GP referrals & Clin PW) (REVELSTOKE PHARMACY FE297)": "#FFD699", # Light Orange
+            "P1 (NHS 111 & GP referrals) (TRINITY PHARMACY FKP10)": "#A3C9F9",              # Light Blue
+            "P1 (NHS 111 & GP referrals) (WOODBRIDGE PHARMACY FLD83)": "#B0EACD"            # Light Mint Green
         }
 
+
+        threshold = 50
         pcm_data = {}
+
         for service_key, service_display in target_services.items():
             row = df[df[service_column].astype(str).str.strip().str.upper() == service_key.upper()]
             if not row.empty:
@@ -359,47 +400,64 @@ if uploaded_file:
                     pass
 
         if pcm_data:
-            chart_df = pd.DataFrame.from_dict(pcm_data, orient='index', columns=['Average PCM'])
-            chart_df.reset_index(inplace=True)
-            chart_df.rename(columns={'index': 'Service'}, inplace=True)
-
-            # Display status messages
+            # Status messages
             for name, value in pcm_data.items():
-                if value < 50:
+                if value < threshold:
                     st.markdown(
-                        f"<div style='color:red; font-weight:bold;'>⚠️ {name}: Underperforming (PCM = {value})</div>",
+                        f"🔻 {name}: Underperforming (Average PCM = {value})</div>",
                         unsafe_allow_html=True
                     )
                 else:
                     st.markdown(
-                        f"<div style='color:green; font-weight:bold;'>✅ {name}: Performing Well (PCM = {value})</div>",
+                        f"<div style='color:green; font-weight:bold;'>🔺 {name}: Performing Well (Average PCM = {value})</div>",
                         unsafe_allow_html=True
                     )
 
-            # Plotly chart with legend and colors
-            fig = px.bar(
-                chart_df,
-                x='Service',
-                y='Average PCM',
-                color='Service',
-                text='Average PCM',
-                color_discrete_map=color_map,  # 👈 assign fixed colors
-                width=1000,
-                height=700
+            # Custom bar chart
+            fig = go.Figure()
+
+            for service, pcm in pcm_data.items():
+                fig.add_trace(go.Bar(
+                    x=[service],
+                    y=[pcm],
+                    name=service,
+                    marker_color=color_map[service],
+                    marker_line_color='black',
+                    marker_line_width=1.2,  # fallback color if missing key
+                    text=[pcm],
+                    textposition="outside",
+                    legendgroup=service,
+                    showlegend=True
+                ))
+
+            fig.add_hline(
+                y=threshold,
+                line_dash="dash",
+                line_color="gray",
+                annotation_text=f"Target Performance = {threshold}",
+                annotation_position="top left"
             )
 
-            fig.update_traces(textposition='outside')
+            fig.update_traces(textposition="outside")
+
             fig.update_layout(
                 xaxis_tickangle=-45,
+                width=1100,
+                height=700,
                 margin=dict(l=20, r=20, t=40, b=20),
-                showlegend=True  # 👈 keep legend
+                showlegend=True,
+                clickmode="event+select",
+                legend_itemclick="toggleothers",
+                legend_itemdoubleclick="toggle"
             )
 
             st.plotly_chart(fig, use_container_width=False)
+
         else:
             st.warning("⚠️ No valid Average PCM values found for selected P1 services.")
 
 
+        # Mapping service keys to display names with pharmacy names
         st.subheader("📊 Blood Pressure Services: Average PCM Comparison")
 
         # Mapping service keys to display names with pharmacy names
@@ -410,15 +468,18 @@ if uploaded_file:
             "Blood Pressure_3": "Blood Pressure (WOODBRIDGE PHARMACY FLD83)"
         }
 
-        # Define colors for each pharmacy display name
+        # Define colors for each pharmacy display name — keys must match the values from target_services exactly
         color_map = {
-            "Blood Pressure (JASMI LIMITED FRT03)": "red",
-            "Blood Pressure_1 (REVELSTOKE PHARMACY FE297)": "orange",
-            "Blood Pressure_2 (TRINITY PHARMACY FKP10)": "blue",
-            "Blood Pressure_3 (WOODBRIDGE PHARMACY FLD83)": "green"
+            "Blood Pressure (JASMI LIMITED FRT03)": "#FFB3B3",       # Soft Red
+            "Blood Pressure (REVELSTOKE PHARMACY FE297)": "#FFE0B2", # Soft Orange/Peach
+            "Blood Pressure (TRINITY PHARMACY FKP10)": "#A3C9F9",    # Light Blue
+            "Blood Pressure (WOODBRIDGE PHARMACY FLD83)": "#B0EACD"  # Light Mint Green
         }
 
+
+        threshold = 30
         pcm_data = {}
+
         for service_key, service_display in target_services.items():
             row = df[df[service_column].astype(str).str.strip().str.upper() == service_key.upper()]
             if not row.empty:
@@ -431,52 +492,66 @@ if uploaded_file:
                     pass
 
         if pcm_data:
-            chart_df = pd.DataFrame.from_dict(pcm_data, orient='index', columns=['Average PCM'])
-            chart_df.reset_index(inplace=True)
-            chart_df.rename(columns={'index': 'Service'}, inplace=True)
-
-            # Display status messages
+            # Status messages
             for name, value in pcm_data.items():
-                if value < 30:
+                if value < threshold:
                     st.markdown(
-                        f"<div style='color:red; font-weight:bold;'>⚠️ {name}: Underperforming (PCM = {value})</div>",
+                        f"🔻 {name}: Underperforming (Average PCM = {value})</div>",
                         unsafe_allow_html=True
                     )
                 else:
                     st.markdown(
-                        f"<div style='color:green; font-weight:bold;'>✅ {name}: Performing Well (PCM = {value})</div>",
+                        f"<div style='color:green; font-weight:bold;'>🔺 {name}: Performing Well (Average PCM = {value})</div>",
                         unsafe_allow_html=True
                     )
 
-            # Plotly chart with legend and colors
-            fig = px.bar(
-                chart_df,
-                x='Service',
-                y='Average PCM',
-                color='Service',
-                text='Average PCM',
-                color_discrete_map=color_map,  # 👈 assign fixed colors
-                width=800,
-                height=700
+            # Custom bar chart
+            fig = go.Figure()
+
+            for service, pcm in pcm_data.items():
+                fig.add_trace(go.Bar(
+                    x=[service],
+                    y=[pcm],
+                    name=service,
+                    marker_color=color_map[service],
+                    marker_line_color='black',
+                    marker_line_width=1.2,
+                    text=[pcm],
+                    textposition="outside",
+                    legendgroup=service,
+                    showlegend=True
+                ))
+
+            fig.add_hline(
+                y=threshold,
+                line_dash="dash",
+                line_color="gray",
+                annotation_text=f"Target Performance = {threshold}",
+                annotation_position="top left"
             )
 
-            fig.update_traces(textposition='outside')
             fig.update_layout(
                 xaxis_tickangle=-45,
+                width=800,
+                height=700,
                 margin=dict(l=20, r=20, t=40, b=20),
-                showlegend=True  # 👈 keep legend
+                showlegend=True,
+                clickmode="event+select",
+                legend_itemclick="toggleothers",
+                legend_itemdoubleclick="toggle"
             )
 
             st.plotly_chart(fig, use_container_width=False)
+
         else:
-            st.warning("⚠️ No valid Average PCM values found for selected P1 services.")
+            st.warning("⚠️ No valid Average PCM values found for selected Blood Pressure services.")
 
-
-        
-
-        st.subheader("📊 DMS Services: Average PCM Comparison")
 
         # Mapping service keys to display names with pharmacy names
+        st.subheader("📊 DMS Services: Average PCM Comparison")
+
+
+        # Service mapping
         target_services = {
             "DMS": "DMS (JASMI LIMITED FRT03)",
             "DMS_1": "DMS (REVELSTOKE PHARMACY FE297)",
@@ -484,15 +559,17 @@ if uploaded_file:
             "DMS_3": "DMS (WOODBRIDGE PHARMACY FLD83)"
         }
 
-        # Define colors for each pharmacy display name
+        # Fixed color map
         color_map = {
-            "DMS (JASMI LIMITED FRT03)": "red",
-            "DMS_1 (REVELSTOKE PHARMACY FE297)": "orange",
-            "DMS_2 (TRINITY PHARMACY FKP10)": "blue",
-            "DMS_3 (WOODBRIDGE PHARMACY FLD83)": "green"
+            "DMS (JASMI LIMITED FRT03)": "#FFB3B3",       # Light Red
+            "DMS (REVELSTOKE PHARMACY FE297)": "#FFD580", # Light Orange
+            "DMS (TRINITY PHARMACY FKP10)": "#A3C9F9",    # Light Blue
+            "DMS (WOODBRIDGE PHARMACY FLD83)": "#B0EACD"  # Light Green
         }
 
+        threshold = 20
         pcm_data = {}
+
         for service_key, service_display in target_services.items():
             row = df[df[service_column].astype(str).str.strip().str.upper() == service_key.upper()]
             if not row.empty:
@@ -505,45 +582,60 @@ if uploaded_file:
                     pass
 
         if pcm_data:
-            chart_df = pd.DataFrame.from_dict(pcm_data, orient='index', columns=['Average PCM'])
-            chart_df.reset_index(inplace=True)
-            chart_df.rename(columns={'index': 'Service'}, inplace=True)
-
-            # Display status messages
+            # Status messages
             for name, value in pcm_data.items():
-                if value < 20:
+                if value < threshold:
                     st.markdown(
-                        f"<div style='color:red; font-weight:bold;'>⚠️ {name}: Underperforming (PCM = {value})</div>",
+                        f"🔻 {name}: Underperforming (Average PCM = {value})</div>",
                         unsafe_allow_html=True
                     )
                 else:
                     st.markdown(
-                        f"<div style='color:green; font-weight:bold;'>✅ {name}: Performing Well (PCM = {value})</div>",
+                        f"<div style='color:green; font-weight:bold;'>🔺 {name}: Performing Well (Average PCM = {value})</div>",
                         unsafe_allow_html=True
                     )
 
-            # Plotly chart with legend and colors
-            fig = px.bar(
-                chart_df,
-                x='Service',
-                y='Average PCM',
-                color='Service',
-                text='Average PCM',
-                color_discrete_map=color_map,  # 👈 assign fixed colors
-                width=800,
-                height=700
+            # Custom bar chart
+            fig = go.Figure()
+
+            for service, pcm in pcm_data.items():
+                fig.add_trace(go.Bar(
+                    x=[service],
+                    y=[pcm],
+                    name=service,
+                    marker_color=color_map[service],
+                    marker_line_color='black',
+                    marker_line_width=1.2,
+                    text=[pcm],
+                    textposition="outside",
+                    legendgroup=service,  # group by service
+                    showlegend=True
+                ))
+
+            fig.add_hline(
+                y=threshold,
+                line_dash="dash",
+                line_color="gray",
+                annotation_text=f"Target Performance = {threshold}",
+                annotation_position="top left"
             )
 
-            fig.update_traces(textposition='outside')
             fig.update_layout(
                 xaxis_tickangle=-45,
+                width=800,
+                height=700,
                 margin=dict(l=20, r=20, t=40, b=20),
-                showlegend=True  # 👈 keep legend
+                showlegend=True,
+                clickmode="event+select",
+                legend_itemclick="toggleothers",
+                legend_itemdoubleclick="toggle"
             )
 
             st.plotly_chart(fig, use_container_width=False)
+
         else:
             st.warning("⚠️ No valid Average PCM values found for selected P1 services.")
+
 
 
     except Exception as e:
