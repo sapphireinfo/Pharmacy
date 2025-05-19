@@ -32,8 +32,8 @@ if uploaded_file:
 
         service_column = df.columns[0]
 
-        # st.subheader("🔍 Data Preview")
-        # st.dataframe(df)
+        st.subheader("🔍 Data Preview")
+        st.dataframe(df)
 
         month_pattern = re.compile(r'^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-\d{2}$')
         months = [col for col in df.columns if isinstance(col, str) and month_pattern.match(col)]
@@ -636,9 +636,9 @@ if uploaded_file:
         else:
             st.warning("⚠️ No valid Average PCM values found for selected P1 services.")
         
+
         # Mapping service keys to display names with pharmacy names
         st.subheader("📊 ABPM Services: Average PCM Comparison")
-
 
         # Service mapping
         target_services = {
@@ -661,16 +661,25 @@ if uploaded_file:
         for service_key, service_display in target_services.items():
             row = df[df[service_column].astype(str).str.strip().str.upper() == service_key.upper()]
             if not row.empty:
-                try:
-                    pcm_raw = row.iloc[0].get("Average PCM", "")
-                    if pcm_raw != '':
-                        pcm = round(float(pcm_raw))
-                        pcm_data[service_display] = pcm
-                except:
-                    pass
+                pcm_raw = row.iloc[0].get("Average PCM", "")
+                if pcm_raw not in ['', None]:
+                    try:
+                        pcm = float(pcm_raw)
+                        if pcm >= 0:  # Only include non-negative values
+                            pcm_data[service_display] = round(pcm)
+                        else:
+                            st.warning(f"⚠️ Negative PCM value for {service_display} ignored.")
+                    except ValueError:
+                        st.warning(f"⚠️ Invalid PCM value for {service_display}: {pcm_raw}")
 
         if pcm_data:
-            # Just show service name and value
+            y_values = list(pcm_data.values())
+            max_y = max(y_values)
+
+            # Set y-axis range only if there are non-zero values
+            yaxis_range = [0, max_y + 10] if max_y > 0 else [0, 1]
+
+            # Display service name and value
             for name, value in pcm_data.items():
                 st.markdown(f"📌 {name}: Average PCM = {value}")
 
@@ -682,7 +691,7 @@ if uploaded_file:
                     x=[service],
                     y=[pcm],
                     name=service,
-                    marker_color=color_map[service],
+                    marker_color=color_map.get(service, "#CCCCCC"),
                     marker_line_color='black',
                     marker_line_width=1.2,
                     text=[pcm],
@@ -697,15 +706,18 @@ if uploaded_file:
                 height=700,
                 margin=dict(l=20, r=20, t=40, b=20),
                 showlegend=True,
+                yaxis=dict(range=yaxis_range),
                 clickmode="event+select",
                 legend_itemclick="toggleothers",
                 legend_itemdoubleclick="toggle"
             )
 
-            st.plotly_chart(fig, use_container_width=False)
+            st.plotly_chart(fig, use_container_width=True)
 
         else:
-            st.warning("⚠️ No valid Average PCM values found for selected P1 services.")
+            st.warning("⚠️ No valid (non-negative) Average PCM values found for selected P1 services.")
+
+
         
         # Mapping service keys to display names with pharmacy names
         st.subheader("📊 OC Services: Average PCM Comparison")
@@ -1014,7 +1026,7 @@ if uploaded_file:
 
             fig.update_layout(
                 xaxis_tickangle=-45,
-                width=1000,
+                width=800,
                 height=700,
                 margin=dict(l=20, r=20, t=40, b=20),
                 showlegend=True,
@@ -1086,7 +1098,7 @@ if uploaded_file:
 
             fig.update_layout(
                 xaxis_tickangle=-45,
-                width=1100,
+                width=800,
                 height=700,
                 margin=dict(l=20, r=20, t=40, b=20),
                 showlegend=True,
@@ -1118,6 +1130,77 @@ if uploaded_file:
             "NMS (REVELSTOKE PHARMACY FE297)": "#FFD580", # Light Orange
             "NMS (TRINITY PHARMACY FKP10)": "#A3C9F9",    # Light Blue
             "NMS (WOODBRIDGE PHARMACY FLD83)": "#B0EACD"  # Light Green
+        }
+
+        pcm_data = {}
+
+        for service_key, service_display in target_services.items():
+            row = df[df[service_column].astype(str).str.strip().str.upper() == service_key.upper()]
+            if not row.empty:
+                try:
+                    pcm_raw = row.iloc[0].get("Average PCM", "")
+                    if pcm_raw != '':
+                        pcm = round(float(pcm_raw))
+                        pcm_data[service_display] = pcm
+                except:
+                    pass
+
+        if pcm_data:
+            # Just show service name and value
+            for name, value in pcm_data.items():
+                st.markdown(f"📌 {name}: Average PCM = {value}")
+
+            # Custom bar chart
+            fig = go.Figure()
+
+            for service, pcm in pcm_data.items():
+                fig.add_trace(go.Bar(
+                    x=[service],
+                    y=[pcm],
+                    name=service,
+                    marker_color=color_map[service],
+                    marker_line_color='black',
+                    marker_line_width=1.2,
+                    text=[pcm],
+                    textposition="outside",
+                    legendgroup=service,
+                    showlegend=True
+                ))
+
+            fig.update_layout(
+                xaxis_tickangle=-45,
+                width=800,
+                height=700,
+                margin=dict(l=20, r=20, t=40, b=20),
+                showlegend=True,
+                clickmode="event+select",
+                legend_itemclick="toggleothers",
+                legend_itemdoubleclick="toggle"
+            )
+
+            st.plotly_chart(fig, use_container_width=False)
+
+        else:
+            st.warning("⚠️ No valid Average PCM values found for selected P1 services.")
+
+        # Mapping service keys to display names with pharmacy names
+        st.subheader("📊 P1 Clinical Pathways: Average PCM Comparison")
+
+
+        # Service mapping
+        target_services = {
+            "P1 Clinical Pathways": "P1 Clinical Pathways (JASMI LIMITED FRT03)",
+            "P1 Clinical Pathways_1": "P1 Clinical Pathways (REVELSTOKE PHARMACY FE297)",
+            "P1 Clinical Pathways_2": "P1 Clinical Pathways (TRINITY PHARMACY FKP10)",
+            "P1 Clinical Pathways_3": "P1 Clinical Pathways (WOODBRIDGE PHARMACY FLD83)"
+        }
+
+        # Fixed color map
+        color_map = {
+            "P1 Clinical Pathways (JASMI LIMITED FRT03)": "#FFB3B3",       # Light Red
+            "P1 Clinical Pathways (REVELSTOKE PHARMACY FE297)": "#FFD580", # Light Orange
+            "P1 Clinical Pathways (TRINITY PHARMACY FKP10)": "#A3C9F9",    # Light Blue
+            "P1 Clinical Pathways (WOODBRIDGE PHARMACY FLD83)": "#B0EACD"  # Light Green
         }
 
         pcm_data = {}
