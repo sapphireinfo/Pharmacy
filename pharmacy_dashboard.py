@@ -32,8 +32,8 @@ if uploaded_file:
 
         service_column = df.columns[0]
 
-        st.subheader("🔍 Data Preview")
-        st.dataframe(df)
+        # st.subheader("🔍 Data Preview")
+        # st.dataframe(df)
 
         month_pattern = re.compile(r'^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-\d{2}$')
         months = [col for col in df.columns if isinstance(col, str) and month_pattern.match(col)]
@@ -702,7 +702,7 @@ if uploaded_file:
 
             fig.update_layout(
                 xaxis_tickangle=-45,
-                width=450,
+                width=800,
                 height=700,
                 margin=dict(l=20, r=20, t=40, b=20),
                 showlegend=True,
@@ -1240,7 +1240,7 @@ if uploaded_file:
 
             fig.update_layout(
                 xaxis_tickangle=-45,
-                width=800,
+                width=1000,
                 height=700,
                 margin=dict(l=20, r=20, t=40, b=20),
                 showlegend=True,
