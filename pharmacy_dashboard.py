@@ -137,7 +137,7 @@ if uploaded_file:
             y="Value",
             color="Service",
             markers=True,
-            title="📈 Monthly Trends of All Services – JASMI LIMITED (FRT03))",
+            title="📈 Monthly Trends of All Services: JASMI LIMITED FRT03)",
             labels={"Month_dt": "Month", "Value": "Count", "Service": "Service Type"},
             width=1000,
             height=600
@@ -365,14 +365,14 @@ if uploaded_file:
 
             # Display status messages
             for name, value in pcm_data.items():
-                if value < 30:
+                if value < 50:
                     st.markdown(
-                        f"<div style='color:red; font-weight:bold;'>⚠️ {name}: Underperforming (Average PCM = {value})</div>",
+                        f"<div style='color:red; font-weight:bold;'>⚠️ {name}: Underperforming (PCM = {value})</div>",
                         unsafe_allow_html=True
                     )
                 else:
                     st.markdown(
-                        f"<div style='color:green; font-weight:bold;'>✅ {name}: Performing Well (Average PCM = {value})</div>",
+                        f"<div style='color:green; font-weight:bold;'>✅ {name}: Performing Well (PCM = {value})</div>",
                         unsafe_allow_html=True
                     )
 
@@ -437,14 +437,14 @@ if uploaded_file:
 
             # Display status messages
             for name, value in pcm_data.items():
-                if value < 50:
+                if value < 30:
                     st.markdown(
-                        f"<div style='color:red; font-weight:bold;'>⚠️ {name}: Underperforming (Average PCM = {value})</div>",
+                        f"<div style='color:red; font-weight:bold;'>⚠️ {name}: Underperforming (PCM = {value})</div>",
                         unsafe_allow_html=True
                     )
                 else:
                     st.markdown(
-                        f"<div style='color:green; font-weight:bold;'>✅ {name}: Performing Well (Average PCM = {value})</div>",
+                        f"<div style='color:green; font-weight:bold;'>✅ {name}: Performing Well (PCM = {value})</div>",
                         unsafe_allow_html=True
                     )
 
@@ -513,12 +513,12 @@ if uploaded_file:
             for name, value in pcm_data.items():
                 if value < 20:
                     st.markdown(
-                        f"<div style='color:red; font-weight:bold;'>⚠️ {name}: Underperforming (Average PCM = {value})</div>",
+                        f"<div style='color:red; font-weight:bold;'>⚠️ {name}: Underperforming (PCM = {value})</div>",
                         unsafe_allow_html=True
                     )
                 else:
                     st.markdown(
-                        f"<div style='color:green; font-weight:bold;'>✅ {name}: Performing Well (Average PCM = {value})</div>",
+                        f"<div style='color:green; font-weight:bold;'>✅ {name}: Performing Well (PCM = {value})</div>",
                         unsafe_allow_html=True
                     )
 
